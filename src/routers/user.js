@@ -10,23 +10,26 @@ const {
     Digit2CodeQuery,
     Digit3CodeQuery,
     Digit4CodeQuery,
+    comapaniesEmpRange,
+    comapaniesEmpGreaterThan,
+    numberOfCompany
 } = require('../utils/query')
 const path = require('path')
 
 // Route to create a free trial account
-router.get('/', async (req, res) => {
+router.get('/api/create', async (req, res) => {
     res.sendFile('create.html', {
         root: path.join(__dirname, '../../public'),
     })
 })
 
-router.get('/premium', async (req, res) => {
+router.get('/api/premium', async (req, res) => {
     res.sendFile('getPremium.html', {
         root: path.join(__dirname, '../../public'),
     })
 })
 
-router.post('/create', async (req, res) => {
+router.post('/api/create', async (req, res) => {
     const { name, businessEmail, companyName, phone, purpose } = req.body
     const errors = []
     if (name.trim() === '') errors.push('Name cannot be empty')
@@ -84,7 +87,7 @@ router.post('/create', async (req, res) => {
 
 // Route to create a premium account
 
-router.post('/premium', async (req, res) => {
+router.post('/api/premium', async (req, res) => {
     const {
         name,
         businessEmail,
@@ -159,13 +162,28 @@ router.post('/premium', async (req, res) => {
     }
 })
 
-router.get('/data', async (req, res) => {
+router.get('/api', async (req, res) => {
     try {
         const currTimestamp = Date.now()
         let code
-        if (req.query.siccode2digit) code = req.query.siccode2digit
-        if (req.query.siccode3digit) code = req.query.siccode3digit
-        if (req.query.siccode4digit) code = req.query.siccode4digit
+        if (req.query.siccode2digit) 
+        {
+            if(req.query.siccode2digit.length != 2)
+                return res.status(200).send({error:"Invalid Query"});
+            code = req.query.siccode2digit
+        }
+        if (req.query.siccode3digit) {
+            if(req.query.siccode3digit.length != 3)
+                return res.status(200).send({error:"Invalid Query"});
+            code = req.query.siccode3digit
+        }
+        if (req.query.siccode4digit){
+            if(req.query.siccode4digit.length != 4)
+                return res.status(200).send({error:"Invalid Query"});
+            code = req.query.siccode4digit
+        }
+        let companiesEmpValue = req.query.companiesEmp;
+        let companyValue = req.query.numberOfCompanies;
         const token = req.query.key
         const decodedEmail = decryptToken(token)
         const user = await User.findOne({
@@ -192,7 +210,16 @@ router.get('/data', async (req, res) => {
             }
             //ADd code to delete trial object
             let data = undefined
-            if (code.length === 2) {
+            if(companyValue !== null){
+                data = await numberOfCompany("trialToken",companyValue);
+                if(!data)
+                    throw new Error("Unable to fetch data");
+            }else if(companiesEmpValue !== null ){
+                data = await comapaniesEmpGreaterThan('trialToken',companiesEmpValue);
+                if(!data)
+                    throw new Error("Unable to fetch data");
+            }
+            else if (code.length === 2) {
                 data = await Digit2CodeQuery(code, 'trialToken')
                 if (!data) {
                     throw new Error('Unable to fetch Data')
@@ -208,9 +235,13 @@ router.get('/data', async (req, res) => {
                     throw new Error('Unable to fetch Data')
                 }
             }
+            else{
+                return res.status(404).send({error: "An error occured"});
+            }
             if (!user.alreadyAccessedCodes.includes(code)) {
                 user.trial.credits -= 1
-                user.alreadyAccessedCodes.push(code)
+                if(code !== null)
+                    user.alreadyAccessedCodes.push(code)
                 await user.save()
             }
             return res.status(200).send({ 'Recieved Data': data })
@@ -247,7 +278,16 @@ router.get('/data', async (req, res) => {
             return
         }
         let data = undefined
-        if (code.length === 2) {
+        if(companyValue){
+            data = await numberOfCompany("premiumToken",companyValue);
+            if(!data)
+                throw new Error("Unable to fetch data");
+        }else if(companiesEmpValue){
+            data = await comapaniesEmpGreaterThan('premiumToken',companiesEmpValue);
+            if(!data)
+                throw new Error("Unable to fetch data");
+        }
+        else if (code.length === 2) {
             data = await Digit2CodeQuery(code, 'premiumToken')
             if (!data) {
                 throw new Error('Unable to fetch Data')
@@ -263,9 +303,13 @@ router.get('/data', async (req, res) => {
                 throw new Error('Unable to fetch Data')
             }
         }
+        else{
+            return res.status(404).send({error:"An error occured"});
+        }
         if (!user.alreadyAccessedCodes.includes(code)) {
             foundToken.credits -= 1
-            user.alreadyAccessedCodes.push(code)
+            if(code !== null)
+                user.alreadyAccessedCodes.push(code)
             await user.save()
         }
         res.status(200).send({ 'Data Recieved: ': data })

@@ -26,7 +26,7 @@ app.use(express.static(publicDir));
 
 const UserRoutes = require("./src/routers/user.js");
 
-app.use('/siccodeapi/api',UserRoutes);
+app.use('/siccodeapi',UserRoutes);
 
 
 app.listen(PORT,()=>{

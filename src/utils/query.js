@@ -133,18 +133,28 @@ const comapaniesEmpRange = async (tokenType,minSize, maxSize) => {
         if(parseInt(industry['empsize-3digit-industry']) > parseInt(minSize) && parseInt(industry['empsize-3digit-industry']) < parseInt(maxSize))
             rangeCodes.push(industry);
     })
+    let uniqueCodes = [];
+    const checkCode = (industry)=>{
+        if(uniqueCodes.includes(industry['siccode-3digit']))
+            return false;
+        uniqueCodes.push(industry['siccode-3digit'])
+        return true;
+    }
+    const uniqueCodesArray = rangeCodes.filter(
+        checkCode
+    )
     if(tokenType === "trialToken"){
         trialRangeCodes = [];
         for(var i = 0; i < 3; i++){
             if(rangeCodes[i])
-                trialRangeCodes.push(rangeCodes[i]);
+                trialRangeCodes.push(uniqueCodesArray[i]);
         }
         return {
             data : trialRangeCodes 
         }
     }
     return {
-        data : rangeCodes
+        data : uniqueCodesArray
     }
 }catch(error){
     console.log(error);
@@ -159,44 +169,64 @@ const comapaniesEmpGreaterThan = async (tokenType, minSize) => {
         if(parseInt(industry['empsize-3digit-industry']) > parseInt(minSize))
             rangeCodes.push(industry);
     })
+    let uniqueCodes = [];
+    const checkCode = (industry)=>{
+        if(uniqueCodes.includes(industry['siccode-3digit']))
+            return false;
+        uniqueCodes.push(industry['siccode-3digit'])
+        return true;
+    }
+    const uniqueCodesArray = rangeCodes.filter(
+        checkCode
+    )
     if(tokenType === "trialToken"){
         trialRangeCodes = [];
         for(var i = 0; i < 3; i++){
             if(rangeCodes[i])
-                trialRangeCodes.push(rangeCodes[i]);
+                trialRangeCodes.push(uniqueCodesArray[i]);
         }
         return {
             data : trialRangeCodes 
         }
     }
     return {
-        data : rangeCodes
+        data : uniqueCodesArray
     }
 }catch(error){
     console.log(error);
 }
 }
 
-const numberOfCompanies = async (tokenType, minSize) => {
+const numberOfCompany = async (tokenType, minSize) => {
     try{
-        const industries = await Sicdata.find({});
+        const industries = await Sicdata.find();
         let rangeCodes = [];
     industries.forEach(industry =>{
         if(parseInt(industry['noofcompanies-3digit-industry']) > parseInt(minSize))
             rangeCodes.push(industry);
     })
+    let uniqueCodes = [];
+    const checkCode = (industry)=>{
+        if(uniqueCodes.includes(industry['siccode-3digit']))
+            return false;
+        uniqueCodes.push(industry['siccode-3digit'])
+        return true;
+    }
+    const uniqueCodesArray = rangeCodes.filter(
+        checkCode
+    )
     if(tokenType === "trialToken"){
         trialRangeCodes = [];
         for(var i = 0; i < 3; i++){
             if(rangeCodes[i])
-                trialRangeCodes.push(rangeCodes[i]);
+                trialRangeCodes.push(uniqueCodesArray[i]);
         }
         return {
             data : trialRangeCodes 
         }
     }
     return {
-        data : rangeCodes
+        data : uniqueCodesArray
     }
 }catch(error){
     console.log(error);
@@ -209,5 +239,5 @@ module.exports = {
     Digit4CodeQuery,
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
-    numberOfCompanies,
+    numberOfCompany,
 }
