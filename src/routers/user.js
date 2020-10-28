@@ -210,11 +210,14 @@ router.get('/api', async (req, res) => {
             }
             //ADd code to delete trial object
             let data = undefined
-            if(companyValue !== null){
+            if(companyValue){
+                console.log("companyValue");
                 data = await numberOfCompany("trialToken",companyValue);
                 if(!data)
                     throw new Error("Unable to fetch data");
-            }else if(companiesEmpValue !== null ){
+            }else if(companiesEmpValue ){
+                console.log("companyValue");
+
                 data = await comapaniesEmpGreaterThan('trialToken',companiesEmpValue);
                 if(!data)
                     throw new Error("Unable to fetch data");
@@ -225,6 +228,7 @@ router.get('/api', async (req, res) => {
                     throw new Error('Unable to fetch Data')
                 }
             } else if (code.length === 3) {
+                console.log("3 Digit code");
                 data = await Digit3CodeQuery(code, 'trialToken')
                 if (!data) {
                     throw new Error('Unable to fetch Data')
