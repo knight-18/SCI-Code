@@ -49,13 +49,13 @@ const Digit3CodeQuery = async (code, tokenType) => {
             unique4DigitCodeIndustry,
         } = await queryUtility(code)
         if (tokenType === 'trialToken') {
-            console.log({
-                Industry: industries3Digit[0].Industry,
-                'siccode-3digit': code,
-                'siccodetext-3digit-industry':
-                    industries3Digit[0]['siccodetext-3digit-industry'],
-                'total-company-size-3Digit': noOfCompanies3DigitIndustry,
-            })
+            // console.log({
+            //     Industry: industries3Digit[0].Industry,
+            //     'siccode-3digit': code,
+            //     'siccodetext-3digit-industry':
+            //         industries3Digit[0]['siccodetext-3digit-industry'],
+            //     'total-company-size-3Digit': noOfCompanies3DigitIndustry,
+            // })
             return {
                 Industry: industries3Digit[0].Industry,
                 'siccode-3digit': code,
