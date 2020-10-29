@@ -38,30 +38,6 @@ const sicDataSchema = new Schema({
     },
     "empsize-4digit-industry": {
         type: String,
-    },
-    "siccode-5digit": {
-        type: String,
-    },
-    "siccodetext-5digit-industry": {
-        type: String,
-    },
-    "noofcompanies-5digit-industry": {
-        type: String,
-    },
-    "empsize-5digit-industry": {
-        type: String,
-    },
-    "siccode-6digit": {
-        type: String,
-    },
-    "siccodetext-6digit-industry": {
-        type: String,
-    },
-    "empsize-6digit-industry": {
-        type: String,
-    },
-    "siccode-6digit":{
-        type: String
     }
 })
 

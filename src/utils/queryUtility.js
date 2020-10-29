@@ -22,16 +22,37 @@ module.exports = queryUtility = async (code) => {
                 checkCode3Digit
             )
             let noOfCompanies3DigitIndustry = 0
+            let empSize3DigitIndustry = 0
             unique3DigitCodeIndustry.forEach((industry) => {
                 if (industry['noofcompanies-3digit-industry'] !== undefined)
                     noOfCompanies3DigitIndustry += parseInt(
                         industry['noofcompanies-3digit-industry']
                     )
+                if (industry['empsize-3digit-industry'] !== undefined) {
+                    empSize3DigitIndustry += parseInt(
+                        industry['empsize-3digit-industry']
+                    )
+                }
             })
+            const unique4DigitCodes = []
+            const checkCode4Digit = (industry) => {
+                if (unique4DigitCodes.includes(industry['siccode-4digit'])) {
+                    return false
+                }
+                unique4DigitCodes.push(industry['siccode-4digit'])
+                return true
+            }
+            const unique4DigitCodeIndustry = industries2Digit.filter(
+                checkCode4Digit
+            )
+
             return {
                 industries2Digit,
                 noOfCompanies3DigitIndustry,
                 unique3DigitCodeIndustry,
+                unique3DigitCodes,
+                unique4DigitCodes,
+                empSize3DigitIndustry,
             }
         } else if (code.length === 3) {
             const industries3Digit = await Sicdata.find({
@@ -64,11 +85,17 @@ module.exports = queryUtility = async (code) => {
                 checkCode4Digit
             )
             let noOfCompanies3DigitIndustry = 0
+            let empSize3DigitIndustry = 0
             unique3DigitCodeIndustry.forEach((industry) => {
                 if (industry['noofcompanies-3digit-industry'] !== undefined)
                     noOfCompanies3DigitIndustry += parseInt(
                         industry['noofcompanies-3digit-industry']
                     )
+                if (industry['empsize-3digit-industry'] !== undefined) {
+                    empSize3DigitIndustry += parseInt(
+                        industry['empsize-3digit-industry']
+                    )
+                }
             })
             let noOfCompanies4DigitIndustry = 0
             unique4DigitCodeIndustry.forEach((industry) => {
@@ -85,6 +112,7 @@ module.exports = queryUtility = async (code) => {
                 noOfCompanies4DigitIndustry,
                 unique3DigitCodeIndustry,
                 unique4DigitCodeIndustry,
+                empSize3DigitIndustry
             }
         } else if (code.length === 4) {
             const industries4Digit = await Sicdata.find({
@@ -106,16 +134,6 @@ module.exports = queryUtility = async (code) => {
                 checkCode4Digit
             )
             const unique5DigitCodes = []
-            const checkCode5Digit = (industry) => {
-                if (unique5DigitCodes.includes(industry['siccode-5digit'])) {
-                    return false
-                }
-                unique5DigitCodes.push(industry['siccode-5digit'])
-                return true
-            }
-            const unique5DigitCodeIndustry = industries4Digit.filter(
-                checkCode5Digit
-            )
             let noOfCompanies4DigitIndustry = 0
             unique4DigitCodeIndustry.forEach((industry) => {
                 if (industry['noofcompanies-4digit-industry'] !== undefined)
@@ -123,24 +141,23 @@ module.exports = queryUtility = async (code) => {
                         industry['noofcompanies-4digit-industry']
                     )
             })
-            let noOfCompanies5DigitIndustry = 0
-            unique5DigitCodeIndustry.forEach((industry) => {
-                if (industry['noofcompanies-5digit-industry'] !== undefined)
-                    noOfCompanies5DigitIndustry += parseInt(
-                        industry['noofcompanies-5digit-industry']
+            let noOfEmployeesOf4DigitIndustry = 0
+            unique4DigitCodeIndustry.forEach((industry) => {
+                if (industry['empsize-4digit-industry'] != undefined)
+                    noOfEmployeesOf4DigitIndustry += parseInt(
+                        industry['empsize-4digit-industry']
                     )
             })
             return {
                 industries4Digit,
                 unique4DigitCodes,
-                unique5DigitCodes,
                 noOfCompanies4DigitIndustry,
-                noOfCompanies5DigitIndustry,
                 unique4DigitCodeIndustry,
-                unique5DigitCodeIndustry,
+                noOfEmployeesOf4DigitIndustry
             }
         }
     } catch (error) {
         console.log(error)
+        res.status(404).send({'error':'Something went wrong. Try again'})
     }
 }
