@@ -20,7 +20,7 @@ const apiGenerator = (email)=>{
     for(var i = 0; i < domain.length; i++){
         token += domain[i] + randString1[i];
     }
-    const specialCharsArray = "\^|?*+()"
+    const specialCharsArray = "^|?*+()"
     for(var i = 0; i < token.length; i++){
          if(specialCharsArray.includes(token[i]))
             token[i] = '$';

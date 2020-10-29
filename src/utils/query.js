@@ -49,6 +49,13 @@ const Digit3CodeQuery = async (code, tokenType) => {
             unique4DigitCodeIndustry,
         } = await queryUtility(code)
         if (tokenType === 'trialToken') {
+            // console.log({
+            //     Industry: industries3Digit[0].Industry,
+            //     'siccode-3digit': code,
+            //     'siccodetext-3digit-industry':
+            //         industries3Digit[0]['siccodetext-3digit-industry'],
+            //     'total-company-size-3Digit': noOfCompanies3DigitIndustry,
+            // })
             return {
                 Industry: industries3Digit[0].Industry,
                 'siccode-3digit': code,
@@ -115,9 +122,8 @@ const Digit4CodeQuery = async (code, tokenType) => {
             'total-company-size-4Digit': noOfCompanies4DigitIndustry,
             digit5Companies,
         }
-
     } catch (error) {
-        console.log(error);
+        console.log(error)
     }
 }
 
@@ -125,112 +131,111 @@ const Digit4CodeQuery = async (code, tokenType) => {
 
 // const Digit6CodeQuery = async (code, tokenType) => {}
 
-const comapaniesEmpRange = async (tokenType,minSize, maxSize) => {
-    try{
-        const industries = await Sicdata.find({});
-        let rangeCodes = [];
-    industries.forEach(industry =>{
-        if(parseInt(industry['empsize-3digit-industry']) > parseInt(minSize) && parseInt(industry['empsize-3digit-industry']) < parseInt(maxSize))
-            rangeCodes.push(industry);
-    })
-    let uniqueCodes = [];
-    const checkCode = (industry)=>{
-        if(uniqueCodes.includes(industry['siccode-3digit']))
-            return false;
-        uniqueCodes.push(industry['siccode-3digit'])
-        return true;
-    }
-    const uniqueCodesArray = rangeCodes.filter(
-        checkCode
-    )
-    if(tokenType === "trialToken"){
-        trialRangeCodes = [];
-        for(var i = 0; i < 3; i++){
-            if(rangeCodes[i])
-                trialRangeCodes.push(uniqueCodesArray[i]);
+const comapaniesEmpRange = async (tokenType, minSize, maxSize) => {
+    try {
+        const industries = await Sicdata.find({})
+        let rangeCodes = []
+        industries.forEach((industry) => {
+            if (
+                parseInt(industry['empsize-3digit-industry']) >
+                    parseInt(minSize) &&
+                parseInt(industry['empsize-3digit-industry']) <
+                    parseInt(maxSize)
+            )
+                rangeCodes.push(industry)
+        })
+        let uniqueCodes = []
+        const checkCode = (industry) => {
+            if (uniqueCodes.includes(industry['siccode-3digit'])) return false
+            uniqueCodes.push(industry['siccode-3digit'])
+            return true
+        }
+        const uniqueCodesArray = rangeCodes.filter(checkCode)
+        if (tokenType === 'trialToken') {
+            trialRangeCodes = []
+            for (var i = 0; i < 3; i++) {
+                if (rangeCodes[i]) trialRangeCodes.push(uniqueCodesArray[i])
+            }
+            return {
+                data: trialRangeCodes,
+            }
         }
         return {
-            data : trialRangeCodes 
+            data: uniqueCodesArray,
         }
+    } catch (error) {
+        console.log(error)
     }
-    return {
-        data : uniqueCodesArray
-    }
-}catch(error){
-    console.log(error);
-}
 }
 
 const comapaniesEmpGreaterThan = async (tokenType, minSize) => {
-    try{
-        const industries = await Sicdata.find({});
-        let rangeCodes = [];
-    industries.forEach(industry =>{
-        if(parseInt(industry['empsize-3digit-industry']) > parseInt(minSize))
-            rangeCodes.push(industry);
-    })
-    let uniqueCodes = [];
-    const checkCode = (industry)=>{
-        if(uniqueCodes.includes(industry['siccode-3digit']))
-            return false;
-        uniqueCodes.push(industry['siccode-3digit'])
-        return true;
-    }
-    const uniqueCodesArray = rangeCodes.filter(
-        checkCode
-    )
-    if(tokenType === "trialToken"){
-        trialRangeCodes = [];
-        for(var i = 0; i < 3; i++){
-            if(rangeCodes[i])
-                trialRangeCodes.push(uniqueCodesArray[i]);
+    try {
+        const industries = await Sicdata.find({})
+        let rangeCodes = []
+        industries.forEach((industry) => {
+            if (
+                parseInt(industry['empsize-3digit-industry']) >
+                parseInt(minSize)
+            )
+                rangeCodes.push(industry)
+        })
+        let uniqueCodes = []
+        const checkCode = (industry) => {
+            if (uniqueCodes.includes(industry['siccode-3digit'])) return false
+            uniqueCodes.push(industry['siccode-3digit'])
+            return true
+        }
+        const uniqueCodesArray = rangeCodes.filter(checkCode)
+        if (tokenType === 'trialToken') {
+            trialRangeCodes = []
+            for (var i = 0; i < 3; i++) {
+                if (rangeCodes[i]) trialRangeCodes.push(uniqueCodesArray[i])
+            }
+            return {
+                data: trialRangeCodes,
+            }
         }
         return {
-            data : trialRangeCodes 
+            data: uniqueCodesArray,
         }
+    } catch (error) {
+        console.log(error)
     }
-    return {
-        data : uniqueCodesArray
-    }
-}catch(error){
-    console.log(error);
-}
 }
 
 const numberOfCompany = async (tokenType, minSize) => {
-    try{
-        const industries = await Sicdata.find();
-        let rangeCodes = [];
-    industries.forEach(industry =>{
-        if(parseInt(industry['noofcompanies-3digit-industry']) > parseInt(minSize))
-            rangeCodes.push(industry);
-    })
-    let uniqueCodes = [];
-    const checkCode = (industry)=>{
-        if(uniqueCodes.includes(industry['siccode-3digit']))
-            return false;
-        uniqueCodes.push(industry['siccode-3digit'])
-        return true;
-    }
-    const uniqueCodesArray = rangeCodes.filter(
-        checkCode
-    )
-    if(tokenType === "trialToken"){
-        trialRangeCodes = [];
-        for(var i = 0; i < 3; i++){
-            if(rangeCodes[i])
-                trialRangeCodes.push(uniqueCodesArray[i]);
+    try {
+        const industries = await Sicdata.find()
+        let rangeCodes = []
+        industries.forEach((industry) => {
+            if (
+                parseInt(industry['noofcompanies-3digit-industry']) >=
+                parseInt(minSize)
+            )
+                rangeCodes.push(industry)
+        })
+        let uniqueCodes = []
+        const checkCode = (industry) => {
+            if (uniqueCodes.includes(industry['siccode-3digit'])) return false
+            uniqueCodes.push(industry['siccode-3digit'])
+            return true
+        }
+        const uniqueCodesArray = rangeCodes.filter(checkCode)
+        if (tokenType === 'trialToken') {
+            trialRangeCodes = []
+            for (var i = 0; i < 3; i++) {
+                if (rangeCodes[i]) trialRangeCodes.push(uniqueCodesArray[i])
+            }
+            return {
+                data: trialRangeCodes,
+            }
         }
         return {
-            data : trialRangeCodes 
+            data: uniqueCodesArray,
         }
+    } catch (error) {
+        console.log(error)
     }
-    return {
-        data : uniqueCodesArray
-    }
-}catch(error){
-    console.log(error);
-}
 }
 
 module.exports = {
