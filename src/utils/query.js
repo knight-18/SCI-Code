@@ -222,6 +222,36 @@ const numberOfCompany = async (tokenType, minSize) => {
     }
 }
 
+const findByKeyword = async(keyword)=>{
+    try{
+        keyword = keyword.toLowerCase();
+        let siccode2Digit = []
+        let siccode3Digit = []
+        let siccode4Digit = []
+        const industries = await Sicdata.find();
+        if(industries.length === 0){
+            return {
+                data : 'No result found'
+            }
+        }
+        industries.forEach(async(industry)=>{
+            if(industry['siccodetext-2digit-industry'].toLowerCase().includes(keyword) && !siccode2Digit.includes(industry['siccode-2digit']))
+                siccode2Digit.push(industry['siccode-2digit']);
+            if(industry['siccodetext-3digit-industry'].toLowerCase().includes(keyword) && !siccode3Digit.includes(industry['siccode-3digit']))
+                siccode3Digit.push(industry['siccode-3digit']);
+            if(industry['siccodetext-4digit-industry'].toLowerCase().includes(keyword) && !siccode4Digit.includes(industry['siccode-4digit']))
+                siccode4Digit.push(industry['siccode-4digit']);
+        })
+        return {
+            sicode2Digit : siccode2Digit.toString() ,
+            siccode3Digit : siccode3Digit.toString() ,
+            siccode4Digit : siccode4Digit.toString()
+        }
+    }catch (error) {
+        console.log(error)
+    }
+}
+
 module.exports = {
     Digit2CodeQuery,
     Digit3CodeQuery,
@@ -229,4 +259,5 @@ module.exports = {
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
     numberOfCompany,
+    findByKeyword
 }

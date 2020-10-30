@@ -47,6 +47,9 @@ const userSchema = new Schema(
         alreadyAccessedCodes: {
             type: Array,
         },
+        alreadyAccessedKeyWords:{
+            type: Array
+        }
     },
     {
         timestamps: true,

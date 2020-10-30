@@ -17,6 +17,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.11",
     "nodemailer": "^6.4.14",
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.6",
+    "read-excel-file": "^4.0.7",
+    "xlsx": "^0.16.8"
   }
 }

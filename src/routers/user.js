@@ -13,6 +13,7 @@ const {
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
     numberOfCompany,
+    findByKeyword
 } = require('../utils/query')
 const path = require('path')
 
@@ -218,6 +219,13 @@ router.get('/api', async (req, res) => {
                 return res.status(200).send({ error: 'Invalid Query' })
             code = req.query.siccode4digit
         }
+        let keyword;
+        if(req.query.keyword){
+            if(req.query.keyword.length <= 2)
+                return res.status(400).send({error: 'Keyword should be greater than 2 characters'});
+            keyword = req.query.keyword;
+            keyword = keyword.toLowerCase();
+        }
         let companiesEmpValue = req.query.companiesEmp
         let companyValue = req.query.numberOfCompanies
         const token = req.query.key
@@ -244,7 +252,7 @@ router.get('/api', async (req, res) => {
                 res.status(200).send('Trial token expired.')
                 return
             }
-            //ADd code to delete trial object
+            //Add code to delete trial object
             let data = undefined
             if (code.length === 2) {
                 data = await Digit2CodeQuery(code, 'trialToken')
@@ -275,7 +283,8 @@ router.get('/api', async (req, res) => {
         foundToken = user.premium
         if (
             foundToken.credits === 0 &&
-            !user.alreadyAccessedCodes.includes(code)
+            !user.alreadyAccessedCodes.includes(code) &&
+            !user.alreadyAccessedKeyWords.includes(keyword)
         ) {
             res.status(200).send('No Credits left')
             return
@@ -294,7 +303,12 @@ router.get('/api', async (req, res) => {
             return
         }
         let data = undefined
-        if (companyValue) {
+        if(keyword){
+            data = await findByKeyword(keyword);
+            if(!data)
+                throw new Error("Unable to fetch data");
+        }
+        else if (companyValue) {
             data = await numberOfCompany('premiumToken', companyValue)
             if (!data) throw new Error('Unable to fetch data')
         } else if (companiesEmpValue) {
@@ -321,9 +335,10 @@ router.get('/api', async (req, res) => {
         } else {
             return res.status(404).send({ error: 'An error occured' })
         }
-        if (!user.alreadyAccessedCodes.includes(code)) {
+        if ((code && !user.alreadyAccessedCodes.includes(code)) || (keyword && !user.alreadyAccessedKeyWords.includes(keyword))) {
             foundToken.credits -= 1
             if (code !== null) user.alreadyAccessedCodes.push(code)
+            if(keyword !== null) user.alreadyAccessedKeyWords.push(keyword);
             await user.save()
         }
         res.status(200).send({ 'Data Recieved: ': data })

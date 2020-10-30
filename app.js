@@ -32,16 +32,18 @@ app.use('/siccodeapi',UserRoutes);
 app.listen(PORT,()=>{
     console.log(`Server Up and Running on Port ${PORT}`);
 })
-// const dataArray = require("./test")
+
+
+// const dataArray = require("./originalData");
+// console.log(dataArray.length)
 // const Scidata = require("./src/models/Sicdata")
 // const fun = async()=>{
 //     try {
-//         await Scidata.insertMany(dataArray);
+//         await Scidata.insertMany(dataArray,);
 //         console.log("Sexesful");
 //     } catch (error) {
 //         console.log(error);
 //     }
-
 // }
 
 // fun()

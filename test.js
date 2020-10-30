@@ -14,7 +14,7 @@ var newObject = [
         'empsize-4digit-industry': undefined,
     },
     {
-        Industry: ' Agriculture, Forestry, Fishing',
+        Industry: 'Agriculture, Forestry, Fishing',
         '3 Digit SIC Code': '011 - Cash Grains',
         'siccode-2digit': '01',
         'siccodetext-2digit-industry': 'Agricultural Production - Crops',
