@@ -12,7 +12,7 @@ const {
     Digit4CodeQuery,
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
-    numberOfCompany
+    numberOfCompany,
 } = require('../utils/query')
 const path = require('path')
 
@@ -107,35 +107,23 @@ router.post('/api/premium', async (req, res) => {
         return
     }
     try {
-        const premiumToken = apiGenerator(businessEmail)
-        const premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
-        const premiumObject = new Object({
-            token: premiumToken,
-            expiry: premiumExpiry,
-            credits: selectedCredits,
-        })
-
         const alreadyExistingUser = await User.findOne({ businessEmail })
-        if (alreadyExistingUser) {
-            const updatedUser = await User.findByIdAndUpdate(
-                { _id: alreadyExistingUser._id },
-                {
-                    premium: [...alreadyExistingUser.premium, premiumObject],
-                }
-            )
-            signUpMail(
-                updatedUser,
-                'Subscribed API Key',
-                `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
-            )
-        } else {
+        if (!alreadyExistingUser) {
+            let premiumToken = apiGenerator(businessEmail)
+            let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
+            let premiumObject = new Object({
+                token: premiumToken,
+                expiry: premiumExpiry,
+                credits: selectedCredits,
+            })
             const user = new User({
                 name,
                 businessEmail,
                 companyName,
                 phone,
                 selectedCredits,
-                premium: [premiumObject],
+                premium: premiumObject,
+                isPremium: true,
             })
             const savedUser = await user.save()
             if (!savedUser) {
@@ -147,13 +135,62 @@ router.post('/api/premium', async (req, res) => {
             signUpMail(
                 savedUser,
                 'Subscribed API Key',
-                `Your API Key is <strong>${premiumToken} </strong>. <br> You have subscribed ${selectedCredits} credits`
+                `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
             )
+            res.status(200).send({
+                success:
+                    'Successfully registered. Your api key has been sent to you registered email address',
+            })
+        } else {
+            if (alreadyExistingUser.isPremium) {
+                let newExpiry =
+                    alreadyExistingUser.premium.expiry +
+                    365 * 24 * 60 * 60 * 1000
+                let newCredits =
+                    alreadyExistingUser.premium.credits +
+                    parseInt(selectedCredits)
+                alreadyExistingUser.premium.expiry = newExpiry
+                alreadyExistingUser.premium.credits = newCredits
+                const savedUser = await alreadyExistingUser.save()
+                if (!savedUser) {
+                    res.status(400).send({
+                        error:
+                            'Cannot create the subscription. Please try again',
+                    })
+                    return
+                }
+                signUpMail(
+                    savedUser,
+                    `Renewed Subscription`,
+                    `Your subscription has been renewed.<br> API Key <strong>${savedUser.premium.token}</strong>
+                    <br>Total Credits in your account = ${savedUser.premium.credits}<br>`
+                )
+                res.status(200).send({
+                    success:
+                        'Successfully renewed. Your api key has been sent to you registered email address',
+                })
+            } else {
+                let premiumToken = apiGenerator(businessEmail)
+                let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
+                let premiumObject = new Object({
+                    token: premiumToken,
+                    expiry: premiumExpiry,
+                    credits: selectedCredits,
+                })
+                alreadyExistingUser.premium = premiumObject
+                alreadyExistingUser.isPremium = true
+                await alreadyExistingUser.save()
+                signUpMail(
+                    updatedUser,
+                    'Subscribed API Key',
+                    `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
+                )
+                res.status(200).send({
+                    success:
+                        'Successfully registered. Your api key has been sent to you registered email address',
+                })
+            }
         }
-        res.status(200).send({
-            success:
-                'Successfully registered. Your api key has been sent to you registered email address',
-        })
     } catch (error) {
         console.error(error)
         res.status(200).send({
@@ -166,24 +203,23 @@ router.get('/api', async (req, res) => {
     try {
         const currTimestamp = Date.now()
         let code
-        if (req.query.siccode2digit) 
-        {
-            if(req.query.siccode2digit.length != 2)
-                return res.status(200).send({error:"Invalid Query"});
+        if (req.query.siccode2digit) {
+            if (req.query.siccode2digit.length != 2)
+                return res.status(200).send({ error: 'Invalid Query' })
             code = req.query.siccode2digit
         }
         if (req.query.siccode3digit) {
-            if(req.query.siccode3digit.length != 3)
-                return res.status(200).send({error:"Invalid Query"});
+            if (req.query.siccode3digit.length != 3)
+                return res.status(200).send({ error: 'Invalid Query' })
             code = req.query.siccode3digit
         }
-        if (req.query.siccode4digit){
-            if(req.query.siccode4digit.length != 4)
-                return res.status(200).send({error:"Invalid Query"});
+        if (req.query.siccode4digit) {
+            if (req.query.siccode4digit.length != 4)
+                return res.status(200).send({ error: 'Invalid Query' })
             code = req.query.siccode4digit
         }
-        let companiesEmpValue = req.query.companiesEmp;
-        let companyValue = req.query.numberOfCompanies;
+        let companiesEmpValue = req.query.companiesEmp
+        let companyValue = req.query.numberOfCompanies
         const token = req.query.key
         const decodedEmail = decryptToken(token)
         const user = await User.findOne({
@@ -210,64 +246,33 @@ router.get('/api', async (req, res) => {
             }
             //ADd code to delete trial object
             let data = undefined
-            if(companyValue){
-                console.log("companyValue");
-                data = await numberOfCompany("trialToken",companyValue);
-                if(!data)
-                    throw new Error("Unable to fetch data");
-            }else if(companiesEmpValue ){
-                console.log("companyValue");
-
-                data = await comapaniesEmpGreaterThan('trialToken',companiesEmpValue);
-                if(!data)
-                    throw new Error("Unable to fetch data");
-            }
-            else if (code.length === 2) {
+            if (code.length === 2) {
                 data = await Digit2CodeQuery(code, 'trialToken')
                 if (!data) {
                     throw new Error('Unable to fetch Data')
                 }
-            } else if (code.length === 3) {
-                console.log("3 Digit code");
-                data = await Digit3CodeQuery(code, 'trialToken')
-                if (!data) {
-                    throw new Error('Unable to fetch Data')
-                }
-            } else if (code.length === 4) {
-                data = await Digit4CodeQuery(code, 'trialToken')
-                if (!data) {
-                    throw new Error('Unable to fetch Data')
-                }
-            }
-            else{
-                return res.status(404).send({error: "An error occured"});
+            } else {
+                return res.status(404).send({ error: 'You cannot access this service' })
             }
             if (!user.alreadyAccessedCodes.includes(code)) {
                 user.trial.credits -= 1
-                if(code !== null)
-                    user.alreadyAccessedCodes.push(code)
+                if (code !== null) user.alreadyAccessedCodes.push(code)
+                if(user.trial.credits === 0){
+                    user.trial.token = undefined
+                    user.trial.expiry = Date.now()
+                }
                 await user.save()
             }
             return res.status(200).send({ 'Recieved Data': data })
         }
         //If token is not trial token then checking premium tokens
-        let foundToken = null
-
-        for (let i = 0; i < user.premium.length; i++) {
-            if (user.premium[i].token === token) {
-                foundToken = user.premium[i]
-                break
-            }
-        }
-        // console.log('found token', foundToken)
-        // console.log('User.premium:', user.premium)
-        // console.log('Token', token)
-        // console.log('LOG:', token === user.premium[1].token)
+        let foundToken = user.isPremium
         if (!foundToken) {
             console.log('Premium token did not match')
             res.status(200).send('No such token exists')
             return
         }
+        foundToken = user.premium
         if (
             foundToken.credits === 0 &&
             !user.alreadyAccessedCodes.includes(code)
@@ -277,21 +282,28 @@ router.get('/api', async (req, res) => {
         }
         const isPremiumTokenExpired = currTimestamp > foundToken.expiry
         if (isPremiumTokenExpired) {
+            user.isPremium = false;
+            user.premium.token = undefined;
+            user.premium.credits = 0;
+            const savedUserData = await user.save();
+            if(!savedUserData){
+                return res.status(404).send({error:"Something went wrong. Please try again"});
+            }
             console.log('Token expired')
             res.status(200).send('Premium token expired.')
             return
         }
         let data = undefined
-        if(companyValue){
-            data = await numberOfCompany("premiumToken",companyValue);
-            if(!data)
-                throw new Error("Unable to fetch data");
-        }else if(companiesEmpValue){
-            data = await comapaniesEmpGreaterThan('premiumToken',companiesEmpValue);
-            if(!data)
-                throw new Error("Unable to fetch data");
-        }
-        else if (code.length === 2) {
+        if (companyValue) {
+            data = await numberOfCompany('premiumToken', companyValue)
+            if (!data) throw new Error('Unable to fetch data')
+        } else if (companiesEmpValue) {
+            data = await comapaniesEmpGreaterThan(
+                'premiumToken',
+                companiesEmpValue
+            )
+            if (!data) throw new Error('Unable to fetch data')
+        } else if (code.length === 2) {
             data = await Digit2CodeQuery(code, 'premiumToken')
             if (!data) {
                 throw new Error('Unable to fetch Data')
@@ -306,14 +318,12 @@ router.get('/api', async (req, res) => {
             if (!data) {
                 throw new Error('Unable to fetch Data')
             }
-        }
-        else{
-            return res.status(404).send({error:"An error occured"});
+        } else {
+            return res.status(404).send({ error: 'An error occured' })
         }
         if (!user.alreadyAccessedCodes.includes(code)) {
             foundToken.credits -= 1
-            if(code !== null)
-                user.alreadyAccessedCodes.push(code)
+            if (code !== null) user.alreadyAccessedCodes.push(code)
             await user.save()
         }
         res.status(200).send({ 'Data Recieved: ': data })
@@ -324,5 +334,3 @@ router.get('/api', async (req, res) => {
 })
 
 module.exports = router
-
-//sBaamweJenr4sOhHrcihvBaRsEtBapvWa24w6U-gumgasinld.LcZo6m1-1603883911838

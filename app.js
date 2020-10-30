@@ -57,3 +57,16 @@ app.listen(PORT,()=>{
 // query()
 
 // http://siccode.herokuapp.com/siccodeapi/api/create
+
+// const originalData = require("./data")
+// const newObject = require("./test")
+// const Sicdata = require("./src/models/Sicdata")
+// const fun = async()=>{
+//     try {
+//         await Sicdata.insertMany(newObject)
+//         console.log("SEXESFUK", newObject.length);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
+// fun()

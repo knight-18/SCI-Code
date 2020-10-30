@@ -20,13 +20,12 @@ const apiGenerator = (email)=>{
     for(var i = 0; i < domain.length; i++){
         token += domain[i] + randString1[i];
     }
-    const specialCharsArray = "^|?*+()"
-    for(var i = 0; i < token.length; i++){
-         if(specialCharsArray.includes(token[i]))
-            token[i] = '$';
-    }
-    token += "-" + timeStamp;
-    return token
+    var newToken = token.replace(/\+/g, "$");
+    newToken = newToken.replace(/\?/g,'$');
+    newToken = newToken.replace(/\//g,'$');
+    newToken = newToken.replace(/\#/g,'$');
+    newToken += "-" + timeStamp;
+    return newToken
 }
 
 const decryptToken = (token)=>{

@@ -32,8 +32,7 @@ const userSchema = new Schema(
                 default: 0,
             },
         },
-        premium: [
-            {
+        premium:{
                 token: String,
                 expiry: Date,
                 credits: {
@@ -41,7 +40,10 @@ const userSchema = new Schema(
                     default: 0,
                 },
             },
-        ],
+        isPremium :{
+            type : Boolean,
+            default : false
+        },
         alreadyAccessedCodes: {
             type: Array,
         },

@@ -5,24 +5,43 @@ const Digit2CodeQuery = async (code, tokenType) => {
         const {
             industries2Digit,
             noOfCompanies3DigitIndustry,
-            unique3DigitCodeIndustry,
+            unique3DigitCodes,
+            unique4DigitCodes,
+            empSize3DigitIndustry,
         } = await queryUtility(code)
         if (tokenType === 'trialToken') {
+            let subCategories = [
+                `subcategories${unique3DigitCodes[0]}:${
+                    unique3DigitCodes[0]
+                } \$ ${
+                    unique4DigitCodes[0].includes(unique3DigitCodes[0])
+                        ? unique4DigitCodes[0]
+                        : '***hidden***'
+                }\| ***hidden***`,
+            ]
+            for (var i = 1; i < unique3DigitCodes.length; i++) {
+                subCategories.push(
+                    `subcategories${unique3DigitCodes[i]}:***hidden***`
+                )
+            }
             return {
                 Industry: industries2Digit[0].Industry,
                 'siccode-2digit': code,
                 'siccodetext-2digit-industry':
                     industries2Digit[0]['siccodetext-2digit-industry'],
-                'total-company-size': noOfCompanies3DigitIndustry,
+                'total-company-size': '***hidden***',
+                'emp-size': '***hidden***',
+                subcategory: subCategories.toString(),
             }
         }
-        const digit3Companies = []
-        unique3DigitCodeIndustry.forEach((industry) => {
-            digit3Companies.push({
-                'siccode-3digit': industry['siccode-3digit'],
-                'siccodetext-3digit-industry':
-                    industry['siccodetext-3digit-industry'],
+        let subCategories = []
+        unique3DigitCodes.forEach((code) => {
+            let particularCode = `${code}\$`
+            unique4DigitCodes.forEach((code4Digit) => {
+                if (code4Digit.includes(code))
+                    particularCode += `\|${code4Digit}`
             })
+            subCategories.push(`subcategories${code} : ${particularCode}`)
         })
         return {
             Industry: industries2Digit[0].Industry,
@@ -30,7 +49,8 @@ const Digit2CodeQuery = async (code, tokenType) => {
             'siccodetext-2digit-industry':
                 industries2Digit[0]['siccodetext-2digit-industry'],
             'total-company-size': noOfCompanies3DigitIndustry,
-            digit3Companies,
+            'emp-size': empSize3DigitIndustry,
+            subcategory: subCategories.toString(),
         }
     } catch (error) {
         console.log(error)
@@ -44,41 +64,27 @@ const Digit3CodeQuery = async (code, tokenType) => {
             unique3DigitCodes,
             unique4DigitCodes,
             noOfCompanies3DigitIndustry,
-            noOfCompanies4DigitIndustry,
-            unique3DigitCodeIndustry,
-            unique4DigitCodeIndustry,
+            empSize3DigitIndustry,
         } = await queryUtility(code)
-        if (tokenType === 'trialToken') {
-            // console.log({
-            //     Industry: industries3Digit[0].Industry,
-            //     'siccode-3digit': code,
-            //     'siccodetext-3digit-industry':
-            //         industries3Digit[0]['siccodetext-3digit-industry'],
-            //     'total-company-size-3Digit': noOfCompanies3DigitIndustry,
-            // })
-            return {
-                Industry: industries3Digit[0].Industry,
-                'siccode-3digit': code,
-                'siccodetext-3digit-industry':
-                    industries3Digit[0]['siccodetext-3digit-industry'],
-                'total-company-size-3Digit': noOfCompanies3DigitIndustry,
-            }
-        }
-        const digit4Companies = []
-        unique4DigitCodeIndustry.forEach((industry) => {
-            digit4Companies.push({
-                'siccode-4digit': industry['siccode-4digit'],
-                'siccodetext-4digit-industry':
-                    industry['siccodetext-4digit-industry'],
+
+        let subCategories = []
+        unique3DigitCodes.forEach((code) => {
+            let particularCode = `${code}\$`
+            unique4DigitCodes.forEach((code4Digit) => {
+                if (code4Digit.includes(code))
+                    particularCode += `\|${code4Digit}`
             })
+            subCategories.push(`subcategories${code} : ${particularCode}`)
         })
         return {
             Industry: industries3Digit[0].Industry,
             'siccode-3digit': code,
             'siccodetext-3digit-industry':
                 industries3Digit[0]['siccodetext-3digit-industry'],
-            'total-company-size-3Digit': noOfCompanies3DigitIndustry,
-            digit4Companies,
+            'total-company-size': noOfCompanies3DigitIndustry,
+            'employee-size':
+                empSize3DigitIndustry !== 0 ? empSize3DigitIndustry : 'N/A',
+            subcategory: subCategories.toString(),
         }
     } catch (error) {
         console.log(error)
@@ -89,47 +95,25 @@ const Digit4CodeQuery = async (code, tokenType) => {
     try {
         const {
             industries4Digit,
-            unique4DigitCodes,
-            unique5DigitCodes,
             noOfCompanies4DigitIndustry,
-            noOfCompanies5DigitIndustry,
-            unique4DigitCodeIndustry,
-            unique5DigitCodeIndustry,
+            noOfEmployeesOf4DigitIndustry,
         } = await queryUtility(code)
 
-        if (tokenType === 'trialToken') {
-            return {
-                Industry: industries4Digit[0].Industry,
-                'siccode-4digit': code,
-                'siccodetext-4digit-industry':
-                    industries4Digit[0]['siccodetext-4digit-industry'],
-                'total-company-size-4Digit': noOfCompanies4DigitIndustry,
-            }
-        }
-        const digit5Companies = []
-        unique5DigitCodeIndustry.forEach((industry) => {
-            digit5Companies.push({
-                'siccode-5digit': industry['siccode-5digit'],
-                'siccodetext-5digit-industry':
-                    industry['siccodetext-5digit-industry'],
-            })
-        })
         return {
             Industry: industries4Digit[0].Industry,
             'siccode-4digit': code,
             'siccodetext-4digit-industry':
                 industries4Digit[0]['siccodetext-4digit-industry'],
             'total-company-size-4Digit': noOfCompanies4DigitIndustry,
-            digit5Companies,
+            'emp-size':
+                noOfEmployeesOf4DigitIndustry === 0
+                    ? 'N/A'
+                    : noOfEmployeesOf4DigitIndustry,
         }
     } catch (error) {
         console.log(error)
     }
 }
-
-// const Digit5CodeQuery = async (code, tokenType) => {}
-
-// const Digit6CodeQuery = async (code, tokenType) => {}
 
 const comapaniesEmpRange = async (tokenType, minSize, maxSize) => {
     try {
