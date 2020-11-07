@@ -13,7 +13,7 @@ const {
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
     numberOfCompany,
-    findByKeyword
+    findByKeyword,
 } = require('../utils/query')
 const path = require('path')
 
@@ -219,15 +219,21 @@ router.get('/api', async (req, res) => {
                 return res.status(200).send({ error: 'Invalid Query' })
             code = req.query.siccode4digit
         }
-        let keyword;
-        if(req.query.keyword){
-            if(req.query.keyword.length <= 2)
-                return res.status(400).send({error: 'Keyword should be greater than 2 characters'});
-            keyword = req.query.keyword;
-            keyword = keyword.toLowerCase();
+        let keyword, length
+        if (req.query.keyword) {
+            if (req.query.keyword.length <= 2)
+                return res
+                    .status(400)
+                    .send({
+                        error: 'Keyword should be greater than 2 characters',
+                    })
+            keyword = req.query.keyword
+            keyword = keyword.toLowerCase()
+            if (!req.query.companyLength) length = 2
+            else length = parseInt(req.query.companyLength)
         }
-        let companiesEmpValue = req.query.companiesEmp
-        let companyValue = req.query.numberOfCompanies
+        // let companiesEmpValue = req.query.companiesEmp
+        // let companyValue = req.query.numberOfCompanies
         const token = req.query.key
         const decodedEmail = decryptToken(token)
         const user = await User.findOne({
@@ -260,12 +266,14 @@ router.get('/api', async (req, res) => {
                     throw new Error('Unable to fetch Data')
                 }
             } else {
-                return res.status(404).send({ error: 'You cannot access this service' })
+                return res
+                    .status(404)
+                    .send({ error: 'You cannot access this service' })
             }
             if (!user.alreadyAccessedCodes.includes(code)) {
                 user.trial.credits -= 1
                 if (code !== null) user.alreadyAccessedCodes.push(code)
-                if(user.trial.credits === 0){
+                if (user.trial.credits === 0) {
                     user.trial.token = undefined
                     user.trial.expiry = Date.now()
                 }
@@ -291,33 +299,35 @@ router.get('/api', async (req, res) => {
         }
         const isPremiumTokenExpired = currTimestamp > foundToken.expiry
         if (isPremiumTokenExpired) {
-            user.isPremium = false;
-            user.premium.token = undefined;
-            user.premium.credits = 0;
-            const savedUserData = await user.save();
-            if(!savedUserData){
-                return res.status(404).send({error:"Something went wrong. Please try again"});
+            user.isPremium = false
+            user.premium.token = undefined
+            user.premium.credits = 0
+            const savedUserData = await user.save()
+            if (!savedUserData) {
+                return res
+                    .status(404)
+                    .send({ error: 'Something went wrong. Please try again' })
             }
             console.log('Token expired')
             res.status(200).send('Premium token expired.')
             return
         }
         let data = undefined
-        if(keyword){
-            data = await findByKeyword(keyword);
-            if(!data)
-                throw new Error("Unable to fetch data");
+        if (keyword) {
+            data = await findByKeyword(keyword, length)
+            if (!data) throw new Error('Unable to fetch data')
         }
-        else if (companyValue) {
-            data = await numberOfCompany('premiumToken', companyValue)
-            if (!data) throw new Error('Unable to fetch data')
-        } else if (companiesEmpValue) {
-            data = await comapaniesEmpGreaterThan(
-                'premiumToken',
-                companiesEmpValue
-            )
-            if (!data) throw new Error('Unable to fetch data')
-        } else if (code.length === 2) {
+        // else if (companyValue) {
+        //     data = await numberOfCompany('premiumToken', companyValue)
+        //     if (!data) throw new Error('Unable to fetch data')
+        // } else if (companiesEmpValue) {
+        //     data = await comapaniesEmpGreaterThan(
+        //         'premiumToken',
+        //         companiesEmpValue
+        //     )
+        //     if (!data) throw new Error('Unable to fetch data')
+        // }
+        else if (code.length === 2) {
             data = await Digit2CodeQuery(code, 'premiumToken')
             if (!data) {
                 throw new Error('Unable to fetch Data')
@@ -335,10 +345,13 @@ router.get('/api', async (req, res) => {
         } else {
             return res.status(404).send({ error: 'An error occured' })
         }
-        if ((code && !user.alreadyAccessedCodes.includes(code)) || (keyword && !user.alreadyAccessedKeyWords.includes(keyword))) {
+        if (
+            (code && !user.alreadyAccessedCodes.includes(code)) ||
+            (keyword && !user.alreadyAccessedKeyWords.includes(keyword))
+        ) {
             foundToken.credits -= 1
             if (code !== null) user.alreadyAccessedCodes.push(code)
-            if(keyword !== null) user.alreadyAccessedKeyWords.push(keyword);
+            if (keyword !== null) user.alreadyAccessedKeyWords.push(keyword)
             await user.save()
         }
         res.status(200).send({ 'Data Recieved: ': data })

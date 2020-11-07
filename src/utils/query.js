@@ -222,32 +222,80 @@ const numberOfCompany = async (tokenType, minSize) => {
     }
 }
 
-const findByKeyword = async(keyword)=>{
-    try{
-        keyword = keyword.toLowerCase();
+const findByKeyword = async (keyword, length) => {
+    try {
+        keyword = keyword.toLowerCase()
         let siccode2Digit = []
         let siccode3Digit = []
         let siccode4Digit = []
-        const industries = await Sicdata.find();
-        if(industries.length === 0){
+        const industries = await Sicdata.find()
+        if (industries.length === 0) {
             return {
-                data : 'No result found'
+                data: 'No result found',
             }
         }
-        industries.forEach(async(industry)=>{
-            if(industry['siccodetext-2digit-industry'].toLowerCase().includes(keyword) && !siccode2Digit.includes(industry['siccode-2digit']))
-                siccode2Digit.push(industry['siccode-2digit']);
-            if(industry['siccodetext-3digit-industry'].toLowerCase().includes(keyword) && !siccode3Digit.includes(industry['siccode-3digit']))
-                siccode3Digit.push(industry['siccode-3digit']);
-            if(industry['siccodetext-4digit-industry'].toLowerCase().includes(keyword) && !siccode4Digit.includes(industry['siccode-4digit']))
-                siccode4Digit.push(industry['siccode-4digit']);
+        industries.forEach(async (industry) => {
+            if (
+                industry['siccodetext-2digit-industry']
+                    .toLowerCase()
+                    .includes(keyword) &&
+                !siccode2Digit['siccode-2digit'].includes(
+                    industry['siccode-2digit']
+                )
+            ) {
+                siccode2Digit.push({
+                    Industry: industry.Industry,
+                    'siccode-2digit': industry['siccode-2digit'],
+                    'siccodetext-2digit-industry':
+                        industry['siccodetext-2digit-industry'],
+                })
+            }
+            if (
+                industry['siccodetext-3digit-industry']
+                    .toLowerCase()
+                    .includes(keyword) &&
+                !siccode3Digit['siscode-3digit'].includes(
+                    industry['siccode-3digit']
+                )
+            )
+                siccode3Digit.push({
+                    Industry: industry.Industry,
+                    'siccode-3digit': industry['siccode-3digit'],
+                    'siccodetext-3digit-industry':
+                        industry['siccodetext-3digit-industry'],
+                    'noofcompanies-3digit-industry':
+                        industry['noofcompanies-3digit-industry'],
+                    'empsize-3digit-industry':
+                        industry['empsize-3digit-industry'],
+                })
+            if (
+                industry['siccodetext-4digit-industry']
+                    .toLowerCase()
+                    .includes(keyword) &&
+                !siccode4Digit['siccode-4digit'].includes(
+                    industry['siccode-4digit']
+                )
+            )
+                siccode4Digit.push({
+                    Industry: industry.Industry,
+                    'siccode-4digit': industry['siccode-4digit'],
+                    'siccodetext-4digit-industry':
+                        industry['siccodetext-4digit-industry'],
+                    'noofcompanies-4digit-industry':
+                        industry['noofcompanies-4digit-industry'],
+                    'empsize-4digit-industry':
+                        industry['empsize-4digit-industry'],
+                })
         })
-        return {
-            sicode2Digit : siccode2Digit.toString() ,
-            siccode3Digit : siccode3Digit.toString() ,
-            siccode4Digit : siccode4Digit.toString()
-        }
-    }catch (error) {
+        if (length == 2) return siccode2Digit
+        else if (length == 3) return siccode3Digit
+        else return siccode4Digit
+        // return {
+        //     sicode2Digit: siccode2Digit.toString(),
+        //     siccode3Digit: siccode3Digit.toString(),
+        //     siccode4Digit: siccode4Digit.toString(),
+        // }
+    } catch (error) {
         console.log(error)
     }
 }
@@ -259,5 +307,5 @@ module.exports = {
     comapaniesEmpRange,
     comapaniesEmpGreaterThan,
     numberOfCompany,
-    findByKeyword
+    findByKeyword,
 }
