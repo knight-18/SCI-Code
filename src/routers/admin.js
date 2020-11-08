@@ -49,11 +49,8 @@ router.post('/login', async (req, res) => {
 
 router.get('/', adminAuth,async (req, res) => {
     try {
-        console.log("Route Accessed");
         let userType = req.query.type
-        console.log("UserType:", userType);
         if (userType === 'trial') {
-            console.log("Accesed trial");
             const users = await User.find({ isTrial: true })
             if (users.length == 0)
                 return res.status(200).send({
