@@ -25,8 +25,10 @@ app.use(express.static(publicDir));
 
 
 const UserRoutes = require("./src/routers/user.js");
+const AdminRoutes = require("./src/routers/admin")
 
 app.use('/siccodeapi',UserRoutes);
+app.use("/siccodeapi/api/admin", AdminRoutes)
 
 
 app.listen(PORT,()=>{

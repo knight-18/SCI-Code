@@ -10,9 +10,9 @@ const {
     Digit2CodeQuery,
     Digit3CodeQuery,
     Digit4CodeQuery,
-    comapaniesEmpRange,
-    comapaniesEmpGreaterThan,
-    numberOfCompany,
+    // comapaniesEmpRange,
+    // comapaniesEmpGreaterThan,
+    // numberOfCompany,
     findByKeyword,
 } = require('../utils/query')
 const path = require('path')
@@ -57,7 +57,7 @@ router.post('/api/create', async (req, res) => {
         const token = apiGenerator(businessEmail)
         // console.log('Token:', token)
         user.trial.token = token
-        user.trial.expiry = Date.now() + 90 * 24 * 60 * 60 * 1000
+        user.trial.expiry = Date.now() + 30 * 24 * 60 * 60 * 1000
         user.trial.credits = 10
         const savedUser = await user.save()
         if (savedUser) {
@@ -110,21 +110,21 @@ router.post('/api/premium', async (req, res) => {
     try {
         const alreadyExistingUser = await User.findOne({ businessEmail })
         if (!alreadyExistingUser) {
-            let premiumToken = apiGenerator(businessEmail)
-            let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
-            let premiumObject = new Object({
-                token: premiumToken,
-                expiry: premiumExpiry,
-                credits: selectedCredits,
-            })
+            // let premiumToken = apiGenerator(businessEmail)
+            // let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
+            // let premiumObject = new Object({
+            //     token: premiumToken,
+            //     expiry: premiumExpiry,
+            //     credits: selectedCredits,
+            // })
             const user = new User({
                 name,
                 businessEmail,
                 companyName,
                 phone,
-                selectedCredits,
-                premium: premiumObject,
-                isPremium: true,
+                // selectedCredits,
+                // premium: premiumObject,
+                // isPremium: true,
             })
             const savedUser = await user.save()
             if (!savedUser) {
@@ -135,62 +135,69 @@ router.post('/api/premium', async (req, res) => {
             }
             signUpMail(
                 savedUser,
-                'Subscribed API Key',
-                `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
+                'Account Created',
+                `Your account has been created. Please make the payment to access the services.`
             )
             res.status(200).send({
                 success:
-                    'Successfully registered. Your api key has been sent to you registered email address',
+                    'Successfully registered.  Please make the payments to access the services',
             })
         } else {
             if (alreadyExistingUser.isPremium) {
-                let newExpiry =
-                    alreadyExistingUser.premium.expiry +
-                    365 * 24 * 60 * 60 * 1000
-                let newCredits =
-                    alreadyExistingUser.premium.credits +
-                    parseInt(selectedCredits)
-                alreadyExistingUser.premium.expiry = newExpiry
-                alreadyExistingUser.premium.credits = newCredits
-                const savedUser = await alreadyExistingUser.save()
-                if (!savedUser) {
-                    res.status(400).send({
-                        error:
-                            'Cannot create the subscription. Please try again',
-                    })
-                    return
-                }
-                signUpMail(
-                    savedUser,
-                    `Renewed Subscription`,
-                    `Your subscription has been renewed.<br> API Key <strong>${savedUser.premium.token}</strong>
-                    <br>Total Credits in your account = ${savedUser.premium.credits}<br>`
-                )
-                res.status(200).send({
-                    success:
-                        'Successfully renewed. Your api key has been sent to you registered email address',
+                return res.status(200).send({
+                    message : 'Your premium account already exists. Please contact the provider for further details'
                 })
-            } else {
-                let premiumToken = apiGenerator(businessEmail)
-                let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
-                let premiumObject = new Object({
-                    token: premiumToken,
-                    expiry: premiumExpiry,
-                    credits: selectedCredits,
-                })
-                alreadyExistingUser.premium = premiumObject
-                alreadyExistingUser.isPremium = true
-                await alreadyExistingUser.save()
-                signUpMail(
-                    updatedUser,
-                    'Subscribed API Key',
-                    `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
-                )
-                res.status(200).send({
-                    success:
-                        'Successfully registered. Your api key has been sent to you registered email address',
-                })
+                // let newExpiry =
+                //     alreadyExistingUser.premium.expiry +
+                //     365 * 24 * 60 * 60 * 1000
+                // let newCredits =
+                //     alreadyExistingUser.premium.credits +
+                //     parseInt(selectedCredits)
+                // alreadyExistingUser.premium.expiry = newExpiry
+                // alreadyExistingUser.premium.credits = newCredits
+                // const savedUser = await alreadyExistingUser.save()
+                // if (!savedUser) {
+                //     res.status(400).send({
+                //         error:
+                //             'Cannot create the subscription. Please try again',
+                //     })
+                //     return
+                // }
+                // signUpMail(
+                //     savedUser,
+                //     `Renewed Subscription`,
+                //     `Your subscription has been renewed.<br> API Key <strong>${savedUser.premium.token}</strong>
+                //     <br>Total Credits in your account = ${savedUser.premium.credits}<br>`
+                // )
+                // res.status(200).send({
+                //     success:
+                //         'Successfully renewed. Your api key has been sent to you registered email address',
+                // })
+            } 
+            else{
+                return res.status(200).send("Please make payment to access premium services")
+            //     let premiumToken = apiGenerator(businessEmail)
+            //     let premiumExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000
+            //     let premiumObject = new Object({
+            //         token: premiumToken,
+            //         expiry: premiumExpiry,
+            //         credits: selectedCredits,
+            //     })
+            //     alreadyExistingUser.premium = premiumObject
+            //     alreadyExistingUser.isPremium = true
+            //     await alreadyExistingUser.save()
+            //     signUpMail(
+            //         updatedUser,
+            //         'Subscribed API Key',
+            //         `Your API Key is <strong>${premiumToken} </strong> <br> You have subscribed ${selectedCredits} credits`
+            //     )
+            //     res.status(200).send({
+            //         success:
+            //             'Successfully registered. Your api key has been sent to you registered email address',
+            //     })
             }
+
+            
         }
     } catch (error) {
         console.error(error)
@@ -227,10 +234,8 @@ router.get('/api', async (req, res) => {
                     .send({
                         error: 'Keyword should be greater than 2 characters',
                     })
-            keyword = req.query.keyword
-            keyword = keyword.toLowerCase()
-            if (!req.query.companyLength) length = 2
-            else length = parseInt(req.query.companyLength)
+            keyword = req.query.keyword.toLowerCase();
+            length = req.query.codeLength ? parseInt(req.query.codeLength) : 2
         }
         // let companiesEmpValue = req.query.companiesEmp
         // let companyValue = req.query.numberOfCompanies
@@ -313,6 +318,11 @@ router.get('/api', async (req, res) => {
             return
         }
         let data = undefined
+        if(code && keyword){
+            return res.status(200).send({
+                error: 'Invalid Query'
+            })
+        }
         if (keyword) {
             data = await findByKeyword(keyword, length)
             if (!data) throw new Error('Unable to fetch data')

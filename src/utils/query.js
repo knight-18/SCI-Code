@@ -225,76 +225,86 @@ const Digit4CodeQuery = async (code, tokenType) => {
 const findByKeyword = async (keyword, length) => {
     try {
         keyword = keyword.toLowerCase()
-        let siccode2Digit = []
-        let siccode3Digit = []
-        let siccode4Digit = []
+        let siccode2Digit = [],
+            filter2Digit = []
+        let siccode3Digit = [],
+            filter3Digit = []
+        let siccode4Digit = [],
+            filter4Digit = []
         const industries = await Sicdata.find()
         if (industries.length === 0) {
             return {
                 data: 'No result found',
             }
         }
-        industries.forEach(async (industry) => {
-            if (
-                industry['siccodetext-2digit-industry']
-                    .toLowerCase()
-                    .includes(keyword) &&
-                !siccode2Digit['siccode-2digit'].includes(
-                    industry['siccode-2digit']
-                )
-            ) {
-                siccode2Digit.push({
-                    Industry: industry.Industry,
-                    'siccode-2digit': industry['siccode-2digit'],
-                    'siccodetext-2digit-industry':
-                        industry['siccodetext-2digit-industry'],
-                })
-            }
-            if (
-                industry['siccodetext-3digit-industry']
-                    .toLowerCase()
-                    .includes(keyword) &&
-                !siccode3Digit['siscode-3digit'].includes(
-                    industry['siccode-3digit']
-                )
-            )
-                siccode3Digit.push({
-                    Industry: industry.Industry,
-                    'siccode-3digit': industry['siccode-3digit'],
-                    'siccodetext-3digit-industry':
-                        industry['siccodetext-3digit-industry'],
-                    'noofcompanies-3digit-industry':
-                        industry['noofcompanies-3digit-industry'],
-                    'empsize-3digit-industry':
-                        industry['empsize-3digit-industry'],
-                })
-            if (
-                industry['siccodetext-4digit-industry']
-                    .toLowerCase()
-                    .includes(keyword) &&
-                !siccode4Digit['siccode-4digit'].includes(
-                    industry['siccode-4digit']
-                )
-            )
-                siccode4Digit.push({
-                    Industry: industry.Industry,
-                    'siccode-4digit': industry['siccode-4digit'],
-                    'siccodetext-4digit-industry':
-                        industry['siccodetext-4digit-industry'],
-                    'noofcompanies-4digit-industry':
-                        industry['noofcompanies-4digit-industry'],
-                    'empsize-4digit-industry':
-                        industry['empsize-4digit-industry'],
-                })
-        })
-        if (length == 2) return siccode2Digit
-        else if (length == 3) return siccode3Digit
-        else return siccode4Digit
-        // return {
-        //     sicode2Digit: siccode2Digit.toString(),
-        //     siccode3Digit: siccode3Digit.toString(),
-        //     siccode4Digit: siccode4Digit.toString(),
-        // }
+        if(length === 2){
+            industries.forEach(async(industry) =>{
+                if (
+                    industry['siccodetext-2digit-industry']
+                        .toLowerCase()
+                        .includes(keyword) &&
+                    !filter2Digit.includes(industry['siccode-2digit'])
+                ) {
+                    siccode2Digit.push({
+                        Industry: industry.Industry,
+                        'siccode-2digit': industry['siccode-2digit'],
+                        'siccodetext-2digit-industry':
+                            industry['siccodetext-2digit-industry'],
+                    })
+                    filter2Digit.push(industry['siccode-2digit'])
+                }
+            })
+            return siccode2Digit;
+        }
+        else if(length === 3){
+            industries.forEach(async(industry) =>{
+                if (
+                    industry['siccodetext-3digit-industry']
+                        .toLowerCase()
+                        .includes(keyword) &&
+                    !filter3Digit.includes(industry['siccode-3digit'])
+                ) {
+                    siccode3Digit.push({
+                        Industry: industry.Industry,
+                        'siccode-3digit': industry['siccode-3digit'],
+                        'siccodetext-3digit-industry':
+                            industry['siccodetext-3digit-industry'],
+                        'noofcompanies-3digit-industry':
+                            industry['noofcompanies-3digit-industry'],
+                        'empsize-3digit-industry':
+                            industry['empsize-3digit-industry'],
+                    })
+                    filter3Digit.push(industry['siccode-3digit'])
+                }
+            })
+            return siccode3Digit;
+        } 
+        else if(length === 4)
+        {
+            industries.forEach(async(industry)=>{
+                if (
+                    industry['siccodetext-4digit-industry']
+                        .toLowerCase()
+                        .includes(keyword) &&
+                    !filter4Digit.includes(industry['siccode-4digit'])
+                ) {
+                    siccode4Digit.push({
+                        Industry: industry.Industry,
+                        'siccode-4digit': industry['siccode-4digit'],
+                        'siccodetext-4digit-industry':
+                            industry['siccodetext-4digit-industry'],
+                        'noofcompanies-4digit-industry':
+                            industry['noofcompanies-4digit-industry'],
+                        'empsize-4digit-industry':
+                            industry['empsize-4digit-industry'],
+                    })
+                    filter4Digit.push(industry['siccode-4digit'])
+                }
+            })
+            return siccode4Digit;
+        }
+        else
+            return [];
     } catch (error) {
         console.log(error)
     }

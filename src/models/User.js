@@ -37,12 +37,10 @@ const userSchema = new Schema(
                 expiry: Date,
                 credits: {
                     type: Number,
-                    default: 0,
                 },
             },
         isPremium :{
-            type : Boolean,
-            default : false
+            type : Boolean
         },
         alreadyAccessedCodes: {
             type: Array,
